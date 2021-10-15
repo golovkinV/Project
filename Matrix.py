@@ -2,6 +2,7 @@ import functools
 import copy
 
 
+# Help class for task E
 class CramerRule:
 
     def __init__(self, matrix, vector):
@@ -18,7 +19,7 @@ class CramerRule:
                 for j in range(n):
                     line[j][i] = self.vector[j]
                 line_det = self.__determinant(line, n)
-                result.append(line_det/origin_deter)
+                result.append(line_det / origin_deter)
         else:
             raise Exception
         return result
@@ -138,6 +139,18 @@ class Matrix(_Matrix):
         return CramerRule(self, vector).calc()
 
 
+# D
+class SquareMatrix(Matrix):
+
+    def __pow__(self, power, modulo=None):
+        if power == 0:
+            return self
+        origin_matrix = copy.deepcopy(self)
+        for el in range(1, power):
+            origin_matrix *= self
+        return origin_matrix
+
+
 # C
 class MatrixError(Exception):
 
@@ -223,3 +236,33 @@ try:
     print('WA No solution')
 except Exception as e:
     print('\nРешение уравнения (check 3): No answer')
+
+# F - check 1
+m = SquareMatrix([[1, 0], [0, 1]])
+print(f"\nF - check 1: {isinstance(m, Matrix)}")
+
+# F - check 2
+m = SquareMatrix([[1, 0], [0, 1]])
+print(f"\nF - check 2:\n{m ** 0}")
+
+# F - check 3
+m = SquareMatrix([[1, 1, 0, 0, 0, 0],
+                  [0, 1, 1, 0, 0, 0],
+                  [0, 0, 1, 1, 0, 0],
+                  [0, 0, 0, 1, 1, 0],
+                  [0, 0, 0, 0, 1, 1],
+                  [0, 0, 0, 0, 0, 1]]
+                )
+print(f"\n{m}")
+print('----------')
+print(f'Степень 1\n{m ** 1}')
+print('----------')
+print(f'Степень 2\n{m ** 2}')
+print('----------')
+print(f'Степень 3\n{m ** 3}')
+print()
+print('----------')
+print(f'Степень 4\n{m ** 4}')
+print('----------')
+print(f'Степень 5\n{m ** 5}')
+
