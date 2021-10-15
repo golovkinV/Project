@@ -1,4 +1,49 @@
 import functools
+import copy
+
+
+class CramerRule:
+
+    def __init__(self, matrix, vector):
+        self.matrix = matrix
+        self.vector = vector
+
+    def calc(self):
+        n = self.matrix.size()[0]
+        origin_deter = self.__determinant(self.matrix.data, n)
+        result = []
+        if origin_deter > 0:
+            for i in range(n):
+                line = copy.deepcopy(self.matrix.data)
+                for j in range(n):
+                    line[j][i] = self.vector[j]
+                line_det = self.__determinant(line, n)
+                result.append(line_det/origin_deter)
+        else:
+            raise Exception
+        return result
+
+    def __determinant(self, matrix, n):
+        if n == 1:
+            return matrix[0][0]
+        elif n == 2:
+            return matrix[0][0] * matrix[1][1] - matrix[1][0] * matrix[0][1]
+        elif n == 3:
+            return matrix[0][0] * matrix[1][1] * matrix[2][2] \
+                   - matrix[0][0] * matrix[1][2] * matrix[2][1] \
+                   - matrix[0][1] * matrix[1][0] * matrix[2][2] \
+                   + matrix[0][1] * matrix[1][2] * matrix[2][0] \
+                   + matrix[0][2] * matrix[1][0] * matrix[2][1] \
+                   - matrix[0][2] * matrix[1][1] * matrix[2][0]
+        else:
+            c = 0
+            for i in range(n):
+                new_matrix = copy.deepcopy(matrix)
+                new_matrix.pop(0)
+                for j in range(n - 1):
+                    new_matrix[j].pop(i)
+                c += (-1) ** i * matrix[0][i] * self.__determinant(new_matrix, n - 1)
+            return c
 
 
 class _Matrix(object):
@@ -9,7 +54,6 @@ class _Matrix(object):
 class Matrix(_Matrix):
 
     # A
-
     def __str__(self):
         matrix_str = ""
         for rows in self.data:
@@ -89,6 +133,10 @@ class Matrix(_Matrix):
         return [[main_data[j][i] for j in range(len(main_data))]
                 for i in range(len(main_data[0]))]
 
+    # E - решение методом Крамера
+    def solve(self, vector):
+        return CramerRule(self, vector).calc()
+
 
 # C
 class MatrixError(Exception):
@@ -154,9 +202,24 @@ print(f"\nРезультат 0.5 * m2:\n{0.5 * m2}")
 print(f"\nРезультат m2 * (0.5 * mid * m1):\n{m2 * (0.5 * mid * m1)}")
 
 # D - check 3
-mid = Matrix([[1, 0, 0],[0, 1, 0],[0, 0, 1]])
+mid = Matrix([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
 m1 = Matrix([[3, 2], [-10, 0], [14, 5]])
 m2 = Matrix([[5, 2, 10], [-0.5, -0.25, 18], [-22, -2.5, -0.125]])
 print(f"\nРезультат 5 * m2:\n{5 * m2}")
 print(f"\nРезультат m2 * (120 * mid * m1):\n{m2 * (120 * mid * m1)}")
 
+# E - check 1
+m = Matrix([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+print(f"\nРешение уравнения (check 1): {m.solve([1, 1, 1])}")
+
+# E - check 2
+m = Matrix([[1, 1, 1], [0, 2, 0], [0, 0, 4]])
+print(f"\nРешение уравнения (check 2): {m.solve([1, 1, 1])}")
+
+# E - check 3
+m = Matrix([[1, 1, 1], [0, 1, 2], [0.5, 1, 1.5]])
+try:
+    s = m.solve([1, 1, 1])
+    print('WA No solution')
+except Exception as e:
+    print('\nРешение уравнения (check 3): No answer')
